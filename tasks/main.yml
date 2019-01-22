@@ -20,7 +20,7 @@
 - name: "Place nginx configs"
   become: yes
   template:
-    src: {{ item }}
+    src: "{{ item }}"
     dest: "{{ nginx_config_dir }}/{{ item | basename | replace('.conf', '') }}.{{ environment_host }}"
   with_fileglob: templates/nginx-configs/*.conf
   register: nginx_configs
