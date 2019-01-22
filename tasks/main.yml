@@ -1,0 +1,53 @@
+---
+
+- name: "Ensure directories exist"
+  become: yes
+  file:
+    path: '{{ item }}'
+    state: directory
+    mode: 0755
+  with_items:
+    - "{{ app_dir }}"
+
+- name: "Place app configs"
+  become: yes
+  template:
+    src: templates/{{ item }}
+    dest: '{{ app_dir }}/{{ item }}'
+  with_items:
+    - 'docker-compose.yml'
+
+- name: "Place nginx configs"
+  become: yes
+  template:
+    src: {{ item }}
+    dest: "{{ nginx_config_dir }}/{{ item | basename | replace('.conf', '') }}.{{ environment_host }}"
+  with_fileglob: templates/nginx-configs/*.conf
+  register: nginx_configs
+
+- name: "Pull new images"
+  command: 'docker-compose pull'
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: "Update containers"
+  command: 'docker-compose up -d --remove-orphans'
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Connect the nginx proxy to the compose network
+  docker_network:
+    name: "{{ compose_network_name }}"
+    connected:
+      - "nginx-web"
+      - "nginx-gen"
+      - "nginx-letsencrypt"
+    appends: yes
+
+- name: "Restart nginx due to changed configs"
+  command: "docker restart {{ nginx_container_name }}"
+  when: nginx_configs.changed
+
+- name: "Cleanup docker on the host"
+  command: 'docker image prune -f'
+

@@ -1,0 +1,15 @@
+---
+
+docker_registry: 685321914474.dkr.ecr.eu-west-3.amazonaws.com/orbita/{{ app_name }}
+
+app_dir: /opt/{{ app_name }}-{{ environment_name }}
+
+environment_host: "{{ environment_name }}.{{ app_name }}.dev.{{ app_company_host }}"
+
+defaults_username: "{{ app_name }}_user"
+defaults_password: "{{ app_name }}_password"
+
+nginx_config_dir: "/opt/docker-compose-letsencrypt-nginx-proxy-companion/data/vhost.d"
+nginx_container_name: "nginx-web"
+
+compose_network_name: "{{ app_name }}-{{ environment_name }}_default"

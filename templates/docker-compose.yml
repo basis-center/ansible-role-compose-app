@@ -1,0 +1,79 @@
+version: '3'
+services:
+  backend:
+    image: {{ docker_registry }}/backend:{{ environment_name }}
+    environment:
+      - VIRTUAL_HOST=api.{{ environment_host }}
+      - VIRTUAL_PORT=8080
+      - LETSENCRYPT_HOST=api.{{ environment_host }}
+      - APP_LINK=https://{{ environment_host }}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/{{ app_name }}
+      - SPRING_DATASOURCE_USERNAME={{ defaults_username }}
+      - SPRING_DATASOURCE_PASSWORD={{ defaults_password }}
+      - SPRING_REDIS_HOST=redis
+      - SPRING_RABBITMQ_HOST=rabbitmq      
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    restart: always
+
+  # digital-sign:
+  #     image: {{ docker_registry }}/digital-sign:{{ environment_name }}
+  #     restart: always
+
+  # payment:
+  #     image: {{ docker_registry }}/payment:{{ environment_name }}
+  #     restart: always
+
+  # registry:
+  #     image: {{ docker_registry }}/registry:{{ environment_name }}
+  #     restart: always
+
+  frontend:
+    image: {{ docker_registry }}/frontend:{{ environment_name }}
+    environment:
+      - VIRTUAL_HOST={{ environment_host }}
+      - LETSENCRYPT_HOST={{ environment_host }}
+      - API_URL=https://api.{{ environment_host }}/api/v1
+    restart: always
+
+  landing:
+    image: {{ docker_registry }}/landing:{{ environment_name }}
+    environment:
+      - VIRTUAL_HOST=landing.{{ environment_host }}
+      - PRIVATE_OFFICE_URL={{ environment_host }}
+      - LETSENCRYPT_HOST=landing.{{ environment_host }}
+      - API_URL=https://api.{{ environment_host }}/api/v1
+    restart: always
+
+  postgres:
+    image: postgres:10
+    environment:
+      - POSTGRES_DB={{ app_name }}
+      - POSTGRES_USER={{ defaults_username }}
+      - POSTGRES_PASSWORD={{ defaults_password }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:5.0-alpine
+    restart: always  
+
+  rabbitmq:
+    image: 685321914474.dkr.ecr.eu-west-3.amazonaws.com/orbita/alfa-mortgage/rabbitmq
+    environment:
+      - VIRTUAL_HOST=rabbit.{{ environment_host }}
+      - VIRTUAL_PORT=15672
+      - LETSENCRYPT_HOST=rabbit.{{ environment_host }}
+      - RABBITMQ_ERLANG_COOKIE=not_a_secret
+    restart: always
+
+volumes:
+  # mongo:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
