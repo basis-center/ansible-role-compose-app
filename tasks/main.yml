@@ -30,11 +30,6 @@
   args:
     chdir: "{{ app_dir }}"
 
-- name: "Update containers"
-  command: 'docker-compose up -d --remove-orphans'
-  args:
-    chdir: "{{ app_dir }}"
-
 - name: Connect the nginx proxy to the compose network
   docker_network:
     name: "{{ compose_network_name }}"
@@ -47,6 +42,18 @@
 - name: "Restart nginx due to changed configs"
   command: "docker restart {{ nginx_container_name }}"
   when: nginx_configs.changed
+
+- name: "Update containers"
+  command: 'docker-compose up -d --remove-orphans'
+  args:
+    chdir: "{{ app_dir }}"
+
+- apt:
+    name: ['python-setuptools', 'python-pip']
+  become: yes
+
+- pip:
+    name: docker
 
 - name: "Cleanup docker on the host"
   command: 'docker image prune -f'
