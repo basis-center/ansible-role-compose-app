@@ -1,5 +1,11 @@
 ---
 
+- name: Include environmental vars
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ playbook_dir }}/vars/{{ environment_name }}.yml"
+    - "vars/empty.yml"
+
 - name: "Ensure directories exist"
   become: yes
   file:
