@@ -62,5 +62,5 @@
     chdir: "{{ app_dir }}"
 
 - name: "Cleanup docker on the host"
-  command: 'docker image prune -f'
+  command: 'docker system prune -a -f --volumes'
 
