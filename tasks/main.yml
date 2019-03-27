@@ -15,13 +15,20 @@
   with_items:
     - "{{ app_dir }}"
 
-- name: "Place app configs"
+- name: "Place docker-compose.yml"
   become: yes
   template:
     src: templates/{{ item }}
     dest: '{{ app_dir }}/{{ item }}'
   with_items:
     - 'docker-compose.yml'
+
+- name: "Place custom files"
+  become: yes
+  template:
+    src: templates/{{ item }}
+    dest: '{{ app_dir }}/{{ item }}'
+  with_items: "{{ custom_files }}"
 
 - name: "Place nginx configs"
   become: yes
