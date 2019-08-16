@@ -11,5 +11,6 @@ nginx_config_dir: "/opt/docker-compose-letsencrypt-nginx-proxy-companion/data/vh
 nginx_container_name: "nginx-web"
 
 compose_network_name: "{{ app_name }}-{{ environment_name }}_default"
+compose_network_options: {}
 
 custom_files: []

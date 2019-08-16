@@ -53,6 +53,7 @@
 - name: Connect the nginx proxy to the compose network
   docker_network:
     name: "{{ compose_network_name }}"
+    driver_options: '{{ compose_network_options }}'
     connected:
       - "nginx-web"
       - "nginx-gen"
